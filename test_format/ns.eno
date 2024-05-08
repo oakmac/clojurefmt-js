@@ -649,7 +649,7 @@
   (:refer-clojure :exclude [contains? empty? repeat regexp?
                             replace reverse chars keyword concat
                             #?@(:clj [unquote format])])
-  #?(:cljs (:require-macros [cuerdas.core :refer [unsafe-concat nilv]]))
+  #?(:cljs (:require-macros [cuerdas.core :refer [unsafe-concat nilv]])) ;; require-macros!
   (:require [clojure.string :as str]
             [clojure.set :refer [map-invert]]
             [clojure.core :as c]
@@ -657,16 +657,34 @@
             [clojure.walk :refer [stringify-keys]]
             [cuerdas.regexp :as rx]
 
-            #?(:cljs [goog.string :as gstr])
+            #?(:cljs [goog.string :as gstr]) ;; ggg
             #?(:cljs [cljs.reader :as edn]
                :clj  [clojure.edn :as edn]))
-  #?(:clj (:import (java.util List Locale))))
+  #?(:clj (:import (java.util List Locale) ;; lll
+                   (aaa.bbb Ddd Ccc)))) ;; aaa
 --Input
 
 --Expected
 (ns cuerdas.core
-  (:refer-clojure :exclude []))
-  ;; FIXME: unfinished
+  #?(:cljs
+     (:require-macros
+       [cuerdas.core :refer [nilv unsafe-concat]])) ;; require-macros!
+  (:require
+    [clojure.core :as c]
+    [clojure.set :refer [map-invert]]
+    [clojure.string :as str]
+    [clojure.walk :refer [stringify-keys]]
+    [cuerdas.regexp :as rx]
+    #?@(:clj
+        [[clojure.edn :as edn]]
+
+        :cljs
+        [[cljs.reader :as edn]
+         [goog.string :as gstr]])) ;; ggg
+  #?(:clj
+     (:import
+       (aaa.bbb Ccc Ddd) ;; aaa
+       (java.util List Locale)))) ;; lll
 --Expected
 
 # ns: metabase.util
@@ -792,14 +810,31 @@
     [aaa.bbb :as bbb])
   #?(:cljs
      (:require-macros
-       [ccc.ddd :as d :refer [hhh ggg]])))
+       [ccc.ddd :as d :refer [hhh ggg]]))) ;; ddd
 --Input
 
 --Expected
 (ns com.example.my-app
   #?(:cljs
      (:require-macros
-       [ccc.ddd :as d :refer [ggg hhh]]))
+       [ccc.ddd :as d :refer [ggg hhh]])) ;; ddd
   (:require
     [aaa.bbb :as bbb]))
+--Expected
+
+# ns: require-macros comments
+
+--Input
+(ns bar.core
+  (:require-macros
+    [foo.core :refer [bad add cad]] ;; rad
+    [aaa.bbb :refer [ccc]] ;; ddd
+    ))
+--Input
+
+--Expected
+(ns bar.core
+  (:require-macros
+    [aaa.bbb :refer [ccc]] ;; ddd
+    [foo.core :refer [add bad cad]])) ;; rad
 --Expected

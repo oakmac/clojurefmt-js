@@ -81,7 +81,7 @@ ignoreTests.add('Surrounding newlines removed 3')
 
 // FIXME: get these namespaces to work
 ignoreTests.add('ns: figwheel.main')
-ignoreTests.add('ns: cuerdas.core')
+// ignoreTests.add('ns: cuerdas.core')
 ignoreTests.add('ns: metabase.util')
 ignoreTests.add('ambiguous import comment')
 
