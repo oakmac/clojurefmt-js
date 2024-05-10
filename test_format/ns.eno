@@ -658,14 +658,17 @@
             [cuerdas.regexp :as rx]
 
             #?(:cljs [goog.string :as gstr]) ;; ggg
-            #?(:cljs [cljs.reader :as edn]
-               :clj  [clojure.edn :as edn]))
+            #?(:cljs [cljs.reader :as edn] ;; cljs-edn
+               :clj  [clojure.edn :as edn])) ;; clj-edn
   #?(:clj (:import (java.util List Locale) ;; lll
                    (aaa.bbb Ddd Ccc)))) ;; aaa
 --Input
 
 --Expected
 (ns cuerdas.core
+  (:refer-clojure :exclude
+    [chars concat contains? empty? keyword regexp? repeat replace reverse
+     #?@(:clj [format unquote])])
   #?(:cljs
      (:require-macros
        [cuerdas.core :refer [nilv unsafe-concat]])) ;; require-macros!
@@ -676,10 +679,10 @@
     [clojure.walk :refer [stringify-keys]]
     [cuerdas.regexp :as rx]
     #?@(:clj
-        [[clojure.edn :as edn]]
+        [[clojure.edn :as edn]] ;; clj-edn
 
         :cljs
-        [[cljs.reader :as edn]
+        [[cljs.reader :as edn] ;; cljs-edn
          [goog.string :as gstr]])) ;; ggg
   #?(:clj
      (:import
@@ -837,4 +840,68 @@
   (:require-macros
     [aaa.bbb :refer [ccc]] ;; ddd
     [foo.core :refer [add bad cad]])) ;; rad
+--Expected
+
+# refer-clojure with reader conditionals 1
+
+> All of the :refer-clojure symbols are specific to a single platform,
+> wrap the entire :refer-clojure for that platform.
+
+--Input
+(ns com.example.my-app
+  (:refer-clojure :only [#?@(:cljs [dissoc conj])]))
+--Input
+
+--Expected
+(ns com.example.my-app
+  #?(:cljs
+     (:refer-clojure :only [conj dissoc])))
+--Expected
+
+# refer-clojure with reader conditionals 2
+
+> We have a mix of symbols for all platforms and specific platforms.
+> Add newlines and use reader conditionals inside of the symbol list.
+
+--Input
+(ns com.example.my-app
+  (:refer-clojure :only [get assoc #?@(:clj [dissoc conj]
+                                       :cljs [partition frequencies])]))
+--Input
+
+--Expected
+(ns com.example.my-app
+  (:refer-clojure :only
+    [assoc get
+     #?@(:clj [conj dissoc]
+         :cljs [frequencies partition])]))
+--Expected
+
+# refer-clojure with reader conditionals 3
+
+--Input
+(ns com.example.my-app
+  (:refer-clojure :only [#?@(:cljs [dissoc conj]
+                             :clj [partition frequencies int])]))
+--Input
+
+--Expected
+(ns com.example.my-app
+  (:refer-clojure :only
+    [#?@(:clj [frequencies int partition]
+         :cljs [conj dissoc])]))
+--Expected
+
+# refer-clojure with multiple clauses
+
+--Input
+(ns cljs.ns-test
+  (:refer-clojure :exclude [+ for] :rename {mapv core-mapv}))
+--Input
+
+--Expected
+(ns cljs.ns-test
+  (:refer-clojure
+    :exclude [+ for]
+    :rename {mapv core-mapv}))
 --Expected
