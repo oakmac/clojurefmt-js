@@ -896,7 +896,7 @@
 
 --Input
 (ns cljs.ns-test
-  (:refer-clojure :exclude [+ for] :rename {mapv core-mapv}))
+  (:refer-clojure :rename {mapv core-mapv} :exclude [+ for])  )
 --Input
 
 --Expected
@@ -904,4 +904,24 @@
   (:refer-clojure
     :exclude [+ for]
     :rename {mapv core-mapv}))
+--Expected
+
+# ClojureScript ns test 2
+
+--Input
+(ns cljs.ns-test
+  (:refer-clojure :exclude [+ for] :rename {mapv core-mapv})
+  (:require-macros [clojure.core :as lang :refer [when when-let] :rename {when always
+                                                                          when-let always-let}]
+                   [cljs.test :refer [deftest is]]))
+--Input
+
+--Expected
+(ns cljs.ns-test
+  (:refer-clojure
+    :exclude [+ for]
+    :rename {mapv core-mapv})
+  (:require-macros
+    [cljs.test :refer [deftest is]]
+    [clojure.core :as lang :refer [when when-let] :rename {when always, when-let always-let}]))
 --Expected
