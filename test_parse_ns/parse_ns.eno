@@ -902,7 +902,7 @@
 }
 --Expected
 
-# require-macros 6
+# require-macros with comments 1
 
 --Input
 (ns bar.core
@@ -946,6 +946,59 @@
       "symbol": "foo.core"
     }
   ]
+}
+--Expected
+
+# require-macros with comments 2
+
+--Input
+(ns bar.core
+  (:require-macros
+    [foo.core :refer [bad add cad]] ;; rad
+    [aaa.bbb :refer [ccc]] ;; ddd
+    ))
+--Input
+
+--Expected
+{
+  "nsSymbol": "bar.core",
+  "requireMacros": [
+    {
+      "commentAfter": ";; ddd",
+      "refer": ["ccc"],
+      "symbol": "aaa.bbb"
+    },
+    {
+      "commentAfter": ";; rad",
+      "refer": ["add", "bad", "cad"],
+      "symbol": "foo.core"
+    }
+  ]
+}
+--Expected
+
+# require-macros with comments 3
+
+--Input
+(ns com.example.my-app
+  #?(:cljs
+     (:require-macros
+       [ccc.ddd :as d :refer [hhh ggg]]))) ;; ddd
+--Input
+
+--Expected
+{
+  "nsSymbol": "com.example.my-app",
+  "requireMacros": [
+    {
+      "as": "d",
+      "commentAfter": ";; ddd",
+      "refer": ["ggg", "hhh"],
+      "platform": ":cljs",
+      "symbol": "ccc.ddd"
+    }
+  ],
+  "commentOutsideNsForm": ";; ddd"
 }
 --Expected
 

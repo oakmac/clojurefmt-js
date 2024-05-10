@@ -649,7 +649,7 @@
   (:refer-clojure :exclude [contains? empty? repeat regexp?
                             replace reverse chars keyword concat
                             #?@(:clj [unquote format])])
-  #?(:cljs (:require-macros [cuerdas.core :refer [unsafe-concat nilv]]))
+  #?(:cljs (:require-macros [cuerdas.core :refer [unsafe-concat nilv]])) ;; require-macros!
   (:require [clojure.string :as str]
             [clojure.set :refer [map-invert]]
             [clojure.core :as c]
@@ -657,16 +657,37 @@
             [clojure.walk :refer [stringify-keys]]
             [cuerdas.regexp :as rx]
 
-            #?(:cljs [goog.string :as gstr])
-            #?(:cljs [cljs.reader :as edn]
-               :clj  [clojure.edn :as edn]))
-  #?(:clj (:import (java.util List Locale))))
+            #?(:cljs [goog.string :as gstr]) ;; ggg
+            #?(:cljs [cljs.reader :as edn] ;; cljs-edn
+               :clj  [clojure.edn :as edn])) ;; clj-edn
+  #?(:clj (:import (java.util List Locale) ;; lll
+                   (aaa.bbb Ddd Ccc)))) ;; aaa
 --Input
 
 --Expected
 (ns cuerdas.core
-  (:refer-clojure :exclude []))
-  ;; FIXME: unfinished
+  (:refer-clojure :exclude
+    [chars concat contains? empty? keyword regexp? repeat replace reverse
+     #?@(:clj [format unquote])])
+  #?(:cljs
+     (:require-macros
+       [cuerdas.core :refer [nilv unsafe-concat]])) ;; require-macros!
+  (:require
+    [clojure.core :as c]
+    [clojure.set :refer [map-invert]]
+    [clojure.string :as str]
+    [clojure.walk :refer [stringify-keys]]
+    [cuerdas.regexp :as rx]
+    #?@(:clj
+        [[clojure.edn :as edn]] ;; clj-edn
+
+        :cljs
+        [[cljs.reader :as edn] ;; cljs-edn
+         [goog.string :as gstr]])) ;; ggg
+  #?(:clj
+     (:import
+       (aaa.bbb Ccc Ddd) ;; aaa
+       (java.util List Locale)))) ;; lll
 --Expected
 
 # ns: metabase.util
@@ -792,14 +813,115 @@
     [aaa.bbb :as bbb])
   #?(:cljs
      (:require-macros
-       [ccc.ddd :as d :refer [hhh ggg]])))
+       [ccc.ddd :as d :refer [hhh ggg]]))) ;; ddd
 --Input
 
 --Expected
 (ns com.example.my-app
   #?(:cljs
      (:require-macros
-       [ccc.ddd :as d :refer [ggg hhh]]))
+       [ccc.ddd :as d :refer [ggg hhh]])) ;; ddd
   (:require
     [aaa.bbb :as bbb]))
+--Expected
+
+# ns: require-macros comments
+
+--Input
+(ns bar.core
+  (:require-macros
+    [foo.core :refer [bad add cad]] ;; rad
+    [aaa.bbb :refer [ccc]] ;; ddd
+    ))
+--Input
+
+--Expected
+(ns bar.core
+  (:require-macros
+    [aaa.bbb :refer [ccc]] ;; ddd
+    [foo.core :refer [add bad cad]])) ;; rad
+--Expected
+
+# refer-clojure with reader conditionals 1
+
+> All of the :refer-clojure symbols are specific to a single platform,
+> wrap the entire :refer-clojure for that platform.
+
+--Input
+(ns com.example.my-app
+  (:refer-clojure :only [#?@(:cljs [dissoc conj])]))
+--Input
+
+--Expected
+(ns com.example.my-app
+  #?(:cljs
+     (:refer-clojure :only [conj dissoc])))
+--Expected
+
+# refer-clojure with reader conditionals 2
+
+> We have a mix of symbols for all platforms and specific platforms.
+> Add newlines and use reader conditionals inside of the symbol list.
+
+--Input
+(ns com.example.my-app
+  (:refer-clojure :only [get assoc #?@(:clj [dissoc conj]
+                                       :cljs [partition frequencies])]))
+--Input
+
+--Expected
+(ns com.example.my-app
+  (:refer-clojure :only
+    [assoc get
+     #?@(:clj [conj dissoc]
+         :cljs [frequencies partition])]))
+--Expected
+
+# refer-clojure with reader conditionals 3
+
+--Input
+(ns com.example.my-app
+  (:refer-clojure :only [#?@(:cljs [dissoc conj]
+                             :clj [partition frequencies int])]))
+--Input
+
+--Expected
+(ns com.example.my-app
+  (:refer-clojure :only
+    [#?@(:clj [frequencies int partition]
+         :cljs [conj dissoc])]))
+--Expected
+
+# refer-clojure with multiple clauses
+
+--Input
+(ns cljs.ns-test
+  (:refer-clojure :rename {mapv core-mapv} :exclude [+ for])  )
+--Input
+
+--Expected
+(ns cljs.ns-test
+  (:refer-clojure
+    :exclude [+ for]
+    :rename {mapv core-mapv}))
+--Expected
+
+# ClojureScript ns test 2
+
+--Input
+(ns cljs.ns-test
+  (:refer-clojure :exclude [+ for] :rename {mapv core-mapv})
+  (:require-macros [clojure.core :as lang :refer [when when-let] :rename {when always
+                                                                          when-let always-let}]
+                   [cljs.test :refer [deftest is]]))
+--Input
+
+--Expected
+(ns cljs.ns-test
+  (:refer-clojure
+    :exclude [+ for]
+    :rename {mapv core-mapv})
+  (:require-macros
+    [cljs.test :refer [deftest is]]
+    [clojure.core :as lang :refer [when when-let] :rename {when always, when-let always-let}]))
 --Expected

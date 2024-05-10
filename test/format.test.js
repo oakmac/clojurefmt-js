@@ -79,11 +79,17 @@ const ignoreTests = new Set()
 // -- C. Oakman, 19 Mar 2024
 ignoreTests.add('Surrounding newlines removed 3')
 
-// FIXME: get these namespaces to work
+// FIXME: get these tests to work
 ignoreTests.add('ns: figwheel.main')
-ignoreTests.add('ns: cuerdas.core')
 ignoreTests.add('ns: metabase.util')
 ignoreTests.add('ambiguous import comment')
+
+ignoreTests.add('ns: cuerdas.core')
+ignoreTests.add('refer-clojure with reader conditionals 1')
+ignoreTests.add('refer-clojure with reader conditionals 2')
+ignoreTests.add('refer-clojure with reader conditionals 3')
+ignoreTests.add('refer-clojure with multiple clauses')
+ignoreTests.add('ClojureScript ns test 2')
 
 allTestCases.forEach(testCase => {
   let runThisTest = true
