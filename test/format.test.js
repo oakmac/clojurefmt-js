@@ -91,6 +91,9 @@ ignoreTests.add('refer-clojure with reader conditionals 3')
 ignoreTests.add('refer-clojure with multiple clauses')
 ignoreTests.add('ClojureScript ns test 2')
 
+ignoreTests.add('gen-class 1')
+ignoreTests.add('gen-class 2')
+
 allTestCases.forEach(testCase => {
   let runThisTest = true
   if (onlyRunCertainTests && !certainTests.has(testCase.name)) runThisTest = false

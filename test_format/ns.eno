@@ -925,3 +925,41 @@
     [cljs.test :refer [deftest is]]
     [clojure.core :as lang :refer [when when-let] :rename {when always, when-let always-let}]))
 --Expected
+
+# gen-class 1
+
+--Input
+(ns com.example.my-app
+  (:gen-class)
+  (:require [aaa.bbb :as ab])
+  )
+--Input
+
+--Expected
+(ns com.example.my-app
+  (:require
+    [aaa.bbb :as ab])
+  (:gen-class))
+--Expected
+
+# gen-class 2
+
+--Input
+(ns com.example.my-app
+  (:gen-class)
+
+  (:gen-class
+    :name com.domain.tiny
+    :methods [#^{:static true} [binomial [int int] double]]))
+
+
+  (:require [aaa.bbb :as ab])
+  )
+--Input
+
+--Expected
+(ns com.example.my-app
+  (:require
+    [aaa.bbb :as ab])
+  (:gen-class))
+--Expected

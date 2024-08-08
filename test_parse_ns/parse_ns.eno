@@ -1183,3 +1183,43 @@
   ]
 }
 --Expected
+
+# gen-class 1
+
+--Input
+(ns com.example.my-app
+  (:gen-class))
+--Input
+
+--Expected
+{
+  "nsSymbol": "com.example.my-app",
+  "genClass": {
+    "isEmpty": true
+  }
+}
+--Expected
+
+# gen-class 2
+
+--Input
+(ns com.example.my-app
+  (:gen-class
+    :name com.domain.tiny
+    :main false))
+--Input
+
+--Expected
+{
+  "nsSymbol": "com.example.my-app",
+  "genClass": {
+    "isEmpty": false,
+    "name": {
+      "name": "com.domain.tiny"
+    },
+    "main": {
+      "value": false
+    }
+  }
+}
+--Expected
